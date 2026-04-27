@@ -10,7 +10,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "pylock=pylock.main:main"
+            "pylock=pylock.cli:main"
         ]
     }
 )
