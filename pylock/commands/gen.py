@@ -1,8 +1,10 @@
-# import secrets
-from pylock.core.generator import generate_password_v2
-# from pylock.services.wordlist import load_words
+import secrets
+import random
+from pylock.core.generator import generate_password_v2, generate_passphrase, generate_username
+from pylock.services.wordlist import load_words, load_username_words
 
 
+# Password generation
 def handle_password(args):
     exclude = []
 
@@ -37,17 +39,44 @@ def handle_password(args):
 
 
 
-# def handle_passphrase(args):
-#     words = load_words()
+# Passphrase generation
+def handle_passphrase(args):
+    words = load_words()
 
-#     if args.words < 2:
-#         raise ValueError("Minimum 2 words required")
+    phrases =[]
 
-#     chosen = [secrets.choice(words) for _ in range(args.words)]
+    for _ in range(args.number):
+        phrase = generate_passphrase(
+            words=args.words,
+            sep=args.sep,
+            caps=args.caps,
+            digits=args.digits,
+            wordlist=words
+        )
+        phrases.append(phrase)
 
-#     if args.caps:
-#         chosen = [w.capitalize() for w in chosen]
+    return phrases
 
-#     separator = args.sep if args.sep else "-"
 
-#     return separator.join(chosen)
+# Username generation
+def handle_username(args):
+    usernames = []
+
+    words = None
+    if args.vibe == "words":
+        words = load_username_words()
+
+    while len(usernames) < args.number:
+        u = generate_username(
+            vibe=args.vibe,
+            name=args.name,
+            digits=args.digits,
+            symbols=args.symbols,
+            caps=args.caps,
+            wordlist=words
+        )
+
+        if u not in usernames:
+            usernames.append(u)
+
+    return usernames

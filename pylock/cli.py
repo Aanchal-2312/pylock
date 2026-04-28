@@ -2,9 +2,10 @@ import argparse
 import getpass
 import os
 import time
-from pylock.commands.gen import handle_password
+from pylock.commands.gen import handle_password, handle_passphrase, handle_username
 from pylock.services.clipboard import copy_to_clipboard
 from pylock.services.storage import save_secure, load_secure
+
 
 def main():
     parser = argparse.ArgumentParser(prog="pylock")
@@ -41,16 +42,36 @@ def main():
     decrypt_parser.add_argument("file")
 
     # passphrase subcommand
-    # pass_parser = gen_sub.add_parser("passphrase")
+    pass_parser = gen_sub.add_parser("passphrase")
 
-    # pass_parser.add_argument("-w", "--words", type=int, default=4)
-    # pass_parser.add_argument("--sep", type=str, default="-")
-    # pass_parser.add_argument("--caps", action="store_true")
-    # pass_parser.add_argument("--copy", action="store_true")
-    # pass_parser.add_argument("--save", type=str)
+    pass_parser.add_argument("-w", "--words", type=int, default=4)
+    pass_parser.add_argument("--sep", type=str, default="-")
+    pass_parser.add_argument("--caps", choices=["first", "all"], default=None)
+
+    pass_parser.add_argument("-d","--digits", type=int, default=0) 
+    pass_parser.add_argument("-n","--number",type=int,default=1)
+
+    pass_parser.add_argument("--copy", choices=["first","last", "all"], default="last")
+    pass_parser.add_argument("--save", type=str)
+
+    # username subcommand
+    user_parser = gen_sub.add_parser("username")
+
+    user_parser.add_argument("--vibe", choices=["clean", "aesthetic", "tech", "edgy","random","gamer","words"], default="clean")
+    user_parser.add_argument("--name", type=str)
+
+    user_parser.add_argument("-d", "--digits", type=int, default=0)
+    user_parser.add_argument("-s", "--symbols", type=int, default=0)
+    user_parser.add_argument("--caps", choices=["first", "all"], default="first")
+
+    user_parser.add_argument("-n", "--number", type=int, default=1)
+
+    user_parser.add_argument("--copy", choices=["first", "last", "all"], default="last")
+    user_parser.add_argument("--save", type=str)  
 
     args = parser.parse_args()
 
+    # Handle Password Generation
     if args.command == "gen" and args.type == "password":
         try:
             passwords = handle_password(args)
@@ -76,7 +97,10 @@ def main():
             if args.save:
                 password = getpass.getpass("Enter master password: ")
                 
-                data = {"passwords": passwords}
+                data = {
+                    "type": "passwords",
+                    "data": passwords
+                }
 
                 save_secure(args.save, data, password)
                 
@@ -86,6 +110,7 @@ def main():
         except ValueError as e:
             print(f"[!] {e}")
 
+    # Handle Decryption
     if args.command == "decrypt":
 
         #check if file exists
@@ -102,10 +127,21 @@ def main():
 
             try:
                 data = load_secure(args.file, password)
-                
-                print("\nDecrypted Data:")
-                for i, p in enumerate(data["passwords"], 1):
-                    print(f"{i}. {p}")
+
+                # ✅ validation
+                if "type" not in data or "data" not in data:
+                    print("[!] Invalid file format")
+                    print("[Hint] File structure is not recognized")
+                    return
+
+                data_type = data["type"]
+                items = data["data"]
+
+                # 🔥 UX upgrade
+                print(f"\n🔓 Decrypted {data_type.capitalize()} Data:\n")
+
+                for i, item in enumerate(items, 1):
+                    print(f"{i}. {item}")
                 break
 
             except ValueError as e:
@@ -121,19 +157,70 @@ def main():
         else:
             print("[!] Access denied after 3 attempts")
 
-    # if args.command == "gen" and args.type == "passphrase":
-    #     phrase = handle_passphrase(args)
+    # Handle Passphrase Generation
+    if args.command == "gen" and args.type == "passphrase":
+        phrases = handle_passphrase(args)
 
-    #     if args.copy:
-    #         import pyperclip
-    #         pyperclip.copy(phrase)
+        # print
+        for i, p in enumerate(phrases, 1):
+            if len(phrases) > 1:
+                print(f"{i}. {p}")
+            else:
+                print(p)
 
-    #     if args.save:
-    #         with open(args.save, "a") as f:
-    #             f.write(phrase + "\n")
+        # copy
+        if args.copy:
+            if args.copy == "first":
+                copy_to_clipboard(phrases[0])
+            elif args.copy == "last":
+                copy_to_clipboard(phrases[-1])
+            elif args.copy == "all":
+                copy_to_clipboard("\n".join(phrases))
+            print("[✓] Copied to clipboard")
 
-    #     print(phrase)
+        # save (secure)
+        if args.save:
+            password = getpass.getpass("Enter master password: ")
+            data = {
+                "type": "passphrases",
+                "data": phrases
+            }
+            save_secure(args.save, data, password)
+            print(f"[✓] Saved securely to {args.save}")
 
+
+    # Handle Username Generation
+    if args.command == "gen" and args.type == "username":
+        usernames = handle_username(args)
+
+        # print
+        for i, u in enumerate(usernames, 1):
+            if len(usernames) > 1:
+                print(f"{i}. {u}")
+            else:
+                print(u)
+
+        # copy
+        if args.copy:
+            if args.copy == "first":
+                copy_to_clipboard(usernames[0])
+            elif args.copy == "last":
+                copy_to_clipboard(usernames[-1])
+            elif args.copy == "all":
+                copy_to_clipboard("\n".join(usernames))
+            print("[✓] Copied to clipboard")
+
+        # save
+        if args.save:
+            password = getpass.getpass("Enter master password: ")
+            data = {
+                "type": "username",
+                "data": usernames
+            }
+            save_secure(args.save, data, password)
+            print(f"[✓] Saved securely to {args.save}") 
+
+# Entry point
 if __name__ == "__main__":
     main()
 
