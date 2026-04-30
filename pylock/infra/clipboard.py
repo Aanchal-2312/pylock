@@ -1,3 +1,4 @@
+"""Clipboard utility functions."""
 import pyperclip
 
 def copy_to_clipboard(text):

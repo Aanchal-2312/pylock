@@ -1,16 +1,17 @@
-from fileinput import filename
-
+"""Secure Storage Utilities.
+Handles encryption, decryption, and safe file storage using Fernet(AES)."""
+import os
+import json
+import base64
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.fernet import InvalidToken, Fernet
-import base64
-import os
-import json
 
 
-# 🔑 derive key from password + salt
+# KEY DERIVATION
 def derive_key(password: str, salt: bytes):
+    """Derive a secure key from password and salt using PBKDF2."""
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -21,12 +22,13 @@ def derive_key(password: str, salt: bytes):
     return base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
 
-# 🔐 encrypt full data
+# ENCRYPTION
 def encrypt_data(data, password):
+    """Encrypt data using a password-derived key."""
     salt = os.urandom(16)
     key = derive_key(password, salt)
     f = Fernet(key)
-
+    
     json_data = json.dumps(data)
     encrypted = f.encrypt(json_data.encode())
 
@@ -36,8 +38,9 @@ def encrypt_data(data, password):
     }
 
 
-# 🔓 decrypt
+# DECRYPTION
 def decrypt_data(file_data, password):
+    """Decrypt stored data using the provided password."""
     salt = base64.b64decode(file_data["salt"])
     key = derive_key(password, salt)
     f = Fernet(key)
@@ -54,23 +57,23 @@ def decrypt_data(file_data, password):
 
     
 
-# 💾 save
+# FILE STORAGE
 def save_secure(filename, data, password):
+    """Encrypt and save data securely to a file."""
     encrypted_blob = encrypt_data(data, password)
 
     with open(filename, "w") as f:
         json.dump(encrypted_blob, f, indent=2)
 
 
-# 📂 read + decrypt
 def load_secure(filename, password):
+    """Load and decrypt secure data from file."""
     try:
         with open(filename, "r") as f:
             file_data = json.load(f)
     except Exception:
-            raise ValueError("corrupted_file")
+        raise ValueError("corrupted_file")
 
-    # check required keys exist
     if "salt" not in file_data or "data" not in file_data:
         raise ValueError("corrupted_file")
 

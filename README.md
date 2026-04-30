@@ -1,68 +1,92 @@
 # 🔐 PyLock
 
-**A modern CLI toolkit for generating, analyzing, and securing credentials.**
+A powerful CLI-based security toolkit for generating, analyzing, validating, and managing credentials.
 
-PyLock helps you create strong passwords, memorable passphrases, and unique usernames — all from your terminal with a clean and intuitive interface.
-
----
-
-## ✨ Features
-
-### 🔹 Password Generator
-
-* Custom length (`-l`)
-* Character control (digits, symbols, uppercase, lowercase)
-* Exclude ambiguous characters (`--na`)
-* Generate multiple passwords (`-n`)
-* Copy to clipboard / Save securely
+Built with a focus on **security, usability, and clean developer experience**.
 
 ---
 
-### 🔹 Passphrase Generator
+## 🚀 Features
 
-* Word-based passwords (Diceware-style)
-* Custom word count (`-w`)
-* Separator control (`--sep`)
-* Capitalization support (`--caps`)
-* Optional digits
-* Copy / Save (encrypted)
+### 🔐 Generation
 
----
+* Secure password generator with full control (length, symbols, digits, ambiguity)
+* Passphrase generator using wordlists (human-readable & strong)
+* Username generator with multiple vibes:
 
-### 🔹 Username Generator
-
-Generate unique usernames with different styles:
-
-#### 🎯 Vibes
-
-* `clean` → `aanchal.dev`
-* `aesthetic` → `hey.aanchal`
-* `tech` → `aanchalops`
-* `edgy` → `aanchalx`
-* `words` → `pixel-orbit` (random word combinations)
-
-#### ⚙️ Options
-
-* Add digits (`-d`)
-* Add symbols (`-s`)
-* Multiple usernames (`-n`)
-* Copy / Save (encrypted)
+  * clean, aesthetic, tech, edgy, gamer, words
 
 ---
 
-### 🔐 Secure Storage
+### 🧠 Security Analysis
 
-* Encrypt saved credentials using a master password
-* Decrypt anytime with `pylock decrypt <file>`
-* Uses modern cryptography (PBKDF2 + Fernet)
+* Password strength scoring (Very Weak → Very Strong)
+* Entropy calculation
+* Crack time estimation
+* Detection of:
+
+  * common passwords
+  * patterns (e.g., `password123`)
+  * repeated characters
+* Smart suggestions for improvement
 
 ---
 
-## 🚀 Installation
+### 🔍 Validation
+
+* Policy-based validation:
+
+  * minimum length
+  * required symbols
+  * required numbers
+  * no repeated characters
+* Configurable defaults
+
+---
+
+### 🔑 Cryptography
+
+* Secure hashing:
+
+  * bcrypt
+  * argon2
+* Password verification
+
+---
+
+### ⚙️ Utilities
+
+* Copy output to clipboard
+* Save encrypted data to file
+* Secure decryption
+* Output formats:
+
+  * JSON
+  * `.env`
+
+---
+
+### ⚙️ Configuration
+
+* View current config
+* Set global defaults for validation and hashing
+* Reset to defaults
+
+---
+
+### 🧪 Tested & Reliable
+
+* Built with modular architecture
+* Core logic fully tested using `pytest`
+
+---
+
+## 📦 Installation
 
 ```bash
-git clone https://github.com/Aanchal-2312/pylock
+git clone https://github.com/Aanchal-2312/pylock.git
 cd pylock
+pip install -r requirements.txt
 pip install -e .
 ```
 
@@ -70,80 +94,110 @@ pip install -e .
 
 ## ⚡ Usage
 
-### Generate Password
+### 🔐 Generate Passwords
 
 ```bash
-pylock gen password
-pylock gen password -l 16 -n 5
+pylock gen password -n 3
+```
+
+### 🔐 Generate Passphrase
+
+```bash
+pylock gen passphrase -w 4 --caps first
+```
+
+### 👤 Generate Username
+
+```bash
+pylock gen username --vibe tech --name aanchal
 ```
 
 ---
 
-### Generate Passphrase
+### 🧠 Analyze Password
 
 ```bash
-pylock gen passphrase -w 4 --caps
+pylock analyze mypassword --strict
 ```
 
 ---
 
-### Generate Username
+### 🔍 Validate Password
 
 ```bash
-pylock gen username --name aanchal --vibe tech
-pylock gen username --vibe words -n 5
+pylock validate mypassword
 ```
 
 ---
 
-### Copy / Save
+### 🔑 Hash Password
 
 ```bash
-pylock gen password --copy
+pylock hash mypassword --algo argon2
+```
+
+---
+
+### 🔑 Verify Password
+
+```bash
+pylock verify mypassword "<hash>"
+```
+
+---
+
+### 💾 Save & Decrypt
+
+```bash
 pylock gen password --save creds.json
-```
-
----
-
-### Decrypt File
-
-```bash
 pylock decrypt creds.json
 ```
 
 ---
 
-## 🧠 Project Vision
+### 📤 Output Formats
 
-PyLock is being built as a **security-focused CLI toolkit** with:
-
-* Strong defaults
-* Clean UX
-* Modular architecture
-* Real-world usability
-
-Future plans include:
-
-* Password strength analysis
-* Policy validation
-* Deterministic password generation
-* AI-assisted suggestions
+```bash
+pylock gen password -n 2 -f json
+pylock validate mypass -f env
+```
 
 ---
 
-## 🛠 Tech Stack
+### ⚙️ Config
 
-* Python
-* argparse (CLI)
-* cryptography (encryption)
-* secrets (secure randomness)
+```bash
+pylock config show
+pylock config set default_algo argon2
+```
+
+---
+
+## 🧠 Design
+
+* Modular architecture:
+
+  * `commands/` → CLI handling
+  * `core/` → logic
+  * `infra/` → storage, clipboard, wordlists
+  * `utils/` → formatting & helpers
+* Secure defaults
+* Clean CLI UX
 
 ---
 
-## 📌 Status
+## 📌 Version
 
-🚧 Actively under development
-Core generation features are complete.
+```bash
+pylock version
+```
 
 ---
+
+## 💛 Author
+
+Built with focus and intention by **Aanchal**
+
+---
+
 

@@ -1,11 +1,13 @@
+"""Handlers for password, passphrase, and username generation commands."""
 import secrets
 import random
 from pylock.core.generator import generate_password_v2, generate_passphrase, generate_username
-from pylock.services.wordlist import load_words, load_username_words
+from pylock.infra.wordlist import load_words, load_username_words
 
 
-# Password generation
 def handle_password(args):
+    """Generate one or more secure passwords based on CLI arguements."""
+    # Build exclusion list
     exclude = []
 
     if args.nd:
@@ -13,6 +15,7 @@ def handle_password(args):
     if args.ns:
         exclude.append("symbols")
 
+    #Build character count constraints 
     counts = {}
 
     if args.uppercase is not None:
@@ -24,6 +27,7 @@ def handle_password(args):
     if args.symbols is not None:
         counts["symbols"] = args.symbols
 
+    # Generate passwords
     results = []
 
     for _ in range(args.number):
@@ -39,12 +43,13 @@ def handle_password(args):
 
 
 
-# Passphrase generation
 def handle_passphrase(args):
+    """Generate passphrases using wordlists."""
     words = load_words()
 
     phrases =[]
 
+    # Generate passphrases
     for _ in range(args.number):
         phrase = generate_passphrase(
             words=args.words,
@@ -58,11 +63,12 @@ def handle_passphrase(args):
     return phrases
 
 
-# Username generation
 def handle_username(args):
+    """Generate unique usernames based on vibe and other parameters."""
     usernames = []
 
     words = None
+    # Load wordlist only for "words" vibe
     if args.vibe == "words":
         words = load_username_words()
 
@@ -75,7 +81,7 @@ def handle_username(args):
             caps=args.caps,
             wordlist=words
         )
-
+        # Ensure usernames are unique
         if u not in usernames:
             usernames.append(u)
 
